@@ -454,6 +454,15 @@ urlpatterns = [
         name="robots",
         distill_func=get_none,
     ),
+    distill_path(
+        "service-worker.js",
+        TemplateView.as_view(template_name="office/service-worker.js", content_type="application/javascript"),
+        name="robots",
+        distill_func=get_none,
+    ),
+    distill_path(
+        "offline.html", TemplateView.as_view(template_name="office/offline.html"), name="robots", distill_func=get_none
+    ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
