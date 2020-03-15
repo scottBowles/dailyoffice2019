@@ -26,6 +26,7 @@
     "copy-webpack-plugin": "^5.0.5",
     "netlify-cli": "^2.32.0",
     "pretty-checkbox": "^3.0.3",
-    "workbox": "^0.0.0"
+    "workbox": "^0.0.0",
+    "workbox-webpack-plugin": "^5.0.0"
   }
 }

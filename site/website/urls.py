@@ -456,7 +456,7 @@ urlpatterns = [
     ),
     distill_path(
         "service-worker.js",
-        TemplateView.as_view(template_name="office/service-worker.js", content_type="application/javascript"),
+        TemplateView.as_view(template_name="office/service-worker.html", content_type="application/javascript"),
         name="robots",
         distill_func=get_none,
     ),

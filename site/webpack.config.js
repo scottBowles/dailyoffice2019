@@ -3,78 +3,86 @@ const WebpackOnBuildPlugin = require('on-build-webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const {GenerateSW} = require('workbox-webpack-plugin');
 
 module.exports = {
-  entry: './office/src/office/js/index.js',
-  module: {
-    rules: [
-      {
-        test: /\.(js)$/,
-        exclude: /node_modules/,
-        use: ['babel-loader']
-      },
-       {
-           test:/\.(s*)css$/,
-           use:['style-loader','css-loader', 'sass-loader', 'postcss-loader']
-        },
-        {
-        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/'
+    entry: './office/src/office/js/index.js',
+    module: {
+        rules: [
+            {
+                test: /\.(js)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader']
+            },
+            {
+                test: /\.(s*)css$/,
+                use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader']
+            },
+            {
+                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]',
+                            outputPath: 'fonts/'
+                        }
+                    }
+                ]
             }
-          }
-        ]
-      }
-    ],
-  },
-  resolve: {
-    extensions: ['*', '.js']
-  },
-  output: {
-    path: __dirname + '/office/static/office/js',
-    publicPath: '/static/office/js/',
-    filename: 'bundle.[contenthash].js'
-  },
-  // optimization: {
-  //   runtimeChunk: 'single',
-  // },
-  watch: true,
-  watchOptions: {
-    aggregateTimeout: 300,
-    poll: 1000,
-    ignored: /node_modules/
-  },
-  mode: "development",
-  plugins: [
-      new CopyPlugin([
-          { from: 'office/src/office/img', to: '../img' },
+        ],
+    },
+    resolve: {
+        extensions: ['*', '.js']
+    },
+    output: {
+        path: __dirname + '/office/static/office/js',
+        publicPath: '/static/office/js/',
+        filename: 'bundle.[contenthash].js'
+    },
+    // optimization: {
+    //   runtimeChunk: 'single',
+    // },
+    watch: true,
+    watchOptions: {
+        aggregateTimeout: 300,
+        poll: 1000,
+        ignored: /node_modules/
+    },
+    mode: "development",
+    plugins: [
+        new CopyPlugin([
+            {from: 'office/src/office/img', to: '../img'},
         ]),
-      new WebpackOnBuildPlugin(function(stats) {
-        const buildDir = __dirname + '/office/static/office/js/';
-        const newlyCreatedAssets = stats.compilation.assets;
+        new WebpackOnBuildPlugin(function (stats) {
+            const buildDir = __dirname + '/office/static/office/js/';
+            const newlyCreatedAssets = stats.compilation.assets;
 
-        const unlinked = [];
-        let res = fs.readdirSync(buildDir)
-        res.forEach((file) => {
-            if (!newlyCreatedAssets[file]) {
-              try {
-                fs.unlinkSync(path.resolve(buildDir + file));
-                unlinked.push(file);
-              } catch(err) {
-                console.log(err)
-              }
+            const unlinked = [];
+            let res = fs.readdirSync(buildDir)
+            res.forEach((file) => {
+                if (!newlyCreatedAssets[file]) {
+                    try {
+                        fs.unlinkSync(path.resolve(buildDir + file));
+                        unlinked.push(file);
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            })
+            if (unlinked.length > 0) {
+                console.log('Removed old assets: ', unlinked);
             }
-      })
-      if (unlinked.length > 0) {
-          console.log('Removed old assets: ', unlinked);
-        }
 
 
-    }),
-    new BundleTracker({filename: './webpack-stats.json'})
-  ]
+        }),
+        new BundleTracker({filename: './webpack-stats.json'}),
+        new GenerateSW({
+            maximumFileSizeToCacheInBytes: 5242880,
+            swDest: 'sw.js',
+            offlineGoogleAnalytics: true,
+            navigateFallback: '/offline',
+        }),
+
+    ]
 };
